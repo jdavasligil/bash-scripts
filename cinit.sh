@@ -23,6 +23,7 @@ build/
 *.so
 *.s
 *.S
+*.d
 EOM
 
 # Make File
@@ -60,7 +61,7 @@ $(BINARY): $(OBJECTS)
 	$(CC) -o $@ $^
 
 %.o:%.c
-    $(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean: 
 	rm -rf $(BINARY) $(OBJECTS) $(DEPFILES)
@@ -70,8 +71,8 @@ pack: clean
 
 diff:
 	$(info Repository status and volume of per-file changes:)
-    @git status
-    @git diff --stat
+	@git status
+	@git diff --stat
 EOM
 
 # READ ME
@@ -132,3 +133,5 @@ This project is licensed under the [NAME HERE] License - see the LICENSE.md file
 * [awesome-readme](https://github.com/matiassingers/awesome-readme)
 * [pitchfork](https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs)
 EOM
+
+git init
