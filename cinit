@@ -57,13 +57,13 @@ CFILES=$(foreach D,$(CODEDIRS),$(wildcard $(D)/*.c))
 OBJECTS=$(patsubst %.c,%.o,$(CFILES))
 DEPFILES=$(patsubst %.c,%.d,$(CFILES))
 
+all: $(BUILD)/$(BINARY)
+
 run: $(BUILD)/$(BINARY)
 	./$^
 
-all: $(BUILD)/$(BINARY)
-
-$(BINARY): $(OBJECTS)
-	$(CC) -o $(BUILD)/$@ $^
+$(BUILD)/$(BINARY): $(OBJECTS)
+	$(CC) -o $@ $^
 
 %.o:%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
