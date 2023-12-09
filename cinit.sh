@@ -5,7 +5,7 @@ mkdir src build
 mkdir build/release
 
 # Boilerplate
-cat > src/main.c <<- EOM
+cat > src/main.c <<- 'EOM'
 #include <stdio.h>
 
 int main(int argc, char* argv[]) {
@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
 EOM
 
 # Git Ignore
-cat > .gitignore <<- EOM
+cat > .gitignore <<- 'EOM'
 build/
 
 *.o
@@ -26,26 +26,56 @@ build/
 EOM
 
 # Make File
-cat > Makefile << EOM
-main: main.o
-	gcc build/main.o -o build/main.exe
-main.o: src/main.c
-	gcc -c main.c -o build/main.o
+cat > Makefile << 'EOM'
+# Name of output binary executable
+BINARY=bin
+
+# List of code (.c) directories (sep=space)
+CODEDIRS=src
+
+# List of include (.h) directories (sep=space)
+INCDIRS=./src
+
+# Compiler (gcc/clang)
+CC=gcc
+
+# Optimization flags (https://gcc.gnu.org/onlinedocs/gcc-3.4.6/gcc/Optimize-Options.html)
+OPT=-O0
+
+# Encode make rules for .h dependencies
+DEPFLAGS=-MP -MD
+
+# Extra flags (https://gcc.gnu.org/onlinedocs/gcc/Option-Summary.html)
+CFLAGS=-Wall -Wextra -g $(foreach D,$(INCDIRS),-I$(D)) $(OPT) $(DEPFLAGS)
+
+# List all .c files using regex (wildcard) pattern matching.
+CFILES=$(foreach D,$(CODEDIRS),$(wildcard $(D)/*.c))
+
+OBJECTS=$(patsubst %.c,%.o,$(CFILES))
+DEPFILES=$(patsubst %.c,%.d,$(CFILES))
+
+all: $(BINARY)
+
+$(BINARY): $(OBJECTS)
+	$(CC) -o $@ $^
+
+%.o:%.c
+    $(CC) $(CFLAGS) -c -o $@ $<
+
 clean: 
-	rm build/*.o \
-       build/*.so \
-       build/*.s \
-       build/*.S \
-       build/*.exe
-       build/release/*.o \
-       build/release/*.so \
-       build/release/*.s \
-       build/release/*.S \
-       build/release/*.exe
+	rm -rf $(BINARY) $(OBJECTS) $(DEPFILES)
+
+pack: clean
+	tar zcvf pkg.tgz *
+
+diff:
+	$(info Repository status and volume of per-file changes:)
+    @git status
+    @git diff --stat
 EOM
 
 # READ ME
-cat > README.md <<- EOM
+cat > README.md <<- 'EOM'
 # Project Title
 
 Simple overview of use/purpose.
