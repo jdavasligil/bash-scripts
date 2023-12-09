@@ -2,7 +2,6 @@
 
 # File Directories
 mkdir src build
-mkdir build/release
 
 # Boilerplate
 cat > src/main.c <<- 'EOM'
@@ -37,6 +36,9 @@ CODEDIRS=src
 # List of include (.h) directories (sep=space)
 INCDIRS=./src
 
+# Location to store binary
+BUILD=build
+
 # Compiler (gcc/clang)
 CC=gcc
 
@@ -55,10 +57,13 @@ CFILES=$(foreach D,$(CODEDIRS),$(wildcard $(D)/*.c))
 OBJECTS=$(patsubst %.c,%.o,$(CFILES))
 DEPFILES=$(patsubst %.c,%.d,$(CFILES))
 
-all: $(BINARY)
+run: $(BUILD)/$(BINARY)
+	./$^
+
+all: $(BUILD)/$(BINARY)
 
 $(BINARY): $(OBJECTS)
-	$(CC) -o $@ $^
+	$(CC) -o $(BUILD)/$@ $^
 
 %.o:%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -72,7 +77,7 @@ pack: clean
 diff:
 	$(info Repository status and volume of per-file changes:)
 	@git status
-	@git diff --stat
+	@git --no-pager diff --stat
 EOM
 
 # READ ME
