@@ -63,6 +63,9 @@ all: $(BUILD)/$(BINARY)
 run: $(BUILD)/$(BINARY)
 	./$^
 
+debug: $(BUILD)/$(BINARY)
+	gdb ./$^
+
 $(BUILD)/$(BINARY): $(OBJECTS)
 	$(CC) -o $@ $^
 
