@@ -1,0 +1,150 @@
+#!/bin/bash
+
+# File Directories
+mkdir src build
+
+# Boilerplate
+cat > src/main.cpp <<- 'EOM'
+#include <iostream>
+
+int main() {
+    std::cout << "Hello, world!" << std::endl;
+ 
+    return 0;
+}
+EOM
+
+# Git Ignore
+cat > .gitignore <<- 'EOM'
+build/
+
+*.o
+*.so
+*.s
+*.S
+*.d
+EOM
+
+# Make File
+cat > Makefile << 'EOM'
+# Name of output binary executable
+BINARY=bin
+
+# List of code (.cpp) directories (sep=space)
+CODEDIRS=src
+
+# List of include (.h) directories (sep=space)
+INCDIRS=./src
+
+# Location to store binary
+BUILD=build
+
+# Compiler (g++/clang++)
+CC=clang++
+
+# Optimization flags (https://clang.llvm.org/docs/CommandGuide/clang.html)
+OPT=-O0
+
+# Standard Supported
+STD=-std=c++17
+
+# Encode make rules for .h dependencies
+DEPFLAGS=-MP -MD
+
+# Extra flags (https://gcc.gnu.org/onlinedocs/gcc/Option-Summary.html)
+CFLAGS=-Wall -Wextra -g $(foreach D,$(INCDIRS),-I$(D)) $(OPT) $(DEPFLAGS) $(STD)
+
+# List all .cpp files using regex (wildcard) pattern matching.
+CFILES=$(foreach D,$(CODEDIRS),$(wildcard $(D)/*.cpp))
+
+OBJECTS=$(patsubst %.cpp,%.o,$(CFILES))
+DEPFILES=$(patsubst %.cpp,%.d,$(CFILES))
+
+all: $(BUILD)/$(BINARY)
+
+run: $(BUILD)/$(BINARY)
+	./$^
+
+debug: $(BUILD)/$(BINARY)
+	gdb ./$^
+
+$(BUILD)/$(BINARY): $(OBJECTS)
+	$(CC) -o $@ $^
+
+%.o:%.cpp
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+clean: 
+	rm -rf $(BINARY) $(OBJECTS) $(DEPFILES)
+
+pack: clean
+	tar zcvf pkg.tgz *
+
+diff:
+	$(info Repository status and volume of per-file changes:)
+	@git status
+	@git --no-pager diff --stat
+EOM
+
+# READ ME
+cat > README.md <<- 'EOM'
+# Project Title
+
+Simple overview of use/purpose.
+
+## Description
+
+An in-depth paragraph about your project and overview of use.
+
+## Getting Started
+
+### Dependencies
+
+* Describe any prerequisites, libraries, OS version, etc., needed before installing program.
+
+### Installing
+
+* How/where to download your program
+* Any modifications needed to be made to files/folders
+
+### Executing program
+
+* How to run the program
+* Step-by-step bullets
+```
+code blocks for commands
+```
+
+## Help
+
+Any advise for common problems or issues.
+```
+command to run if program contains helper info
+```
+
+## Authors
+
+Jaedin Davasligil
+[contact](jdavasligil.swimming625@slmails.com)
+
+## Version History
+
+* 0.2
+    * Various bug fixes and optimizations
+    * See [commit change]() or See [release history]()
+* 0.1
+    * Initial Release
+
+## License
+
+This project is licensed under the [NAME HERE] License - see the LICENSE.md file for details
+
+## Acknowledgments
+
+* [awesome-readme](https://github.com/matiassingers/awesome-readme)
+* [pitchfork](https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs)
+EOM
+
+git init
+git add .
+git commit -m "Initial commit"
