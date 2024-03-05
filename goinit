@@ -1,0 +1,184 @@
+#!/bin/bash
+# -----------------------------------------------------------------------------
+# [Jaedin Davasligil] Go-Init
+#       Go-Init initializes a Golang project with useful boilerplate.
+# -----------------------------------------------------------------------------
+
+VERSION=0.1.0
+OPTSTRING=":whv"
+
+USAGE="
+Usage: $(basename $0) [OPTIONS] APPNAME\n\n
+
+Options:\n
+    -h,                        Print the help (usage) documentation.\n
+    -v,                        Print the current release version.\n
+    -w,                        Include boilerplate for web servers.
+"
+
+# Handle Input
+if [[ $# -le 0 ]] || [[ $# -ge 3 ]]; then
+    echo "Error: Illegal number of parameters."
+    echo -e $USAGE
+    exit 1;
+fi
+
+# Handle Options
+WEBAPP="false"
+APPNAME=""
+while getopts $OPTSTRING opt; do
+    case $opt in
+        w)
+            WEBAPP="true"
+            APPNAME=$2
+            ;;
+        h)
+            echo -e $USAGE
+            exit 0;
+            ;;
+        v)
+            echo "goinit v$VERSION"
+            exit 0;
+            ;;
+        \?)
+            echo -e $USAGE
+            exit 1;
+            ;;
+    esac
+done
+
+if [[ $# -eq 1 ]]; then
+    APPNAME=$1
+fi
+
+# Root App Directory
+mkdir $APPNAME && cd $APPNAME
+
+# Base File Directories
+mkdir cmd \
+    cmd/$APPNAME \
+    pkg \
+    bin
+
+# Web App Directories
+if [ "$WEBAPP" == "true" ]; then
+    mkdir web \
+        web/$APPNAME \
+        web/static \
+        web/template
+fi
+
+# Boilerplate
+cat > cmd/$APPNAME/$APPNAME.go <<- 'EOM'
+package main
+
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, world!")
+}
+EOM
+
+# Git Ignore
+cat > .gitignore <<- 'EOM'
+# Mac OS X files
+.DS_Store
+
+# Binaries for programs and plugins
+bin/
+*.exe
+*.exe~
+*.dll
+*.o
+*.s
+*.S
+*.d
+*.so
+*.dylib
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
+.glide/
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+EOM
+
+# Make File
+cat > Makefile << EOM
+build:
+	@go build -o ./bin/$APPNAME ./cmd/$APPNAME
+run:
+	@./bin/$APPNAME
+test:
+	@go test -v ./...
+EOM
+
+# READ ME
+cat > README.md <<- 'EOM'
+# Project Title
+
+Simple overview of use/purpose.
+
+## Description
+
+An in-depth paragraph about your project and overview of use.
+
+## Getting Started
+
+### Dependencies
+
+* Describe any prerequisites, libraries, OS version, etc., needed before installing program.
+
+### Installing
+
+* How/where to download your program
+* Any modifications needed to be made to files/folders
+
+### Executing program
+
+* How to run the program
+* Step-by-step bullets
+```
+code blocks for commands
+```
+
+## Help
+
+Any advise for common problems or issues.
+```
+command to run if program contains helper info
+```
+
+## Authors
+
+Jaedin Davasligil
+[contact](jdavasligil.swimming625@slmails.com)
+
+## Version History
+
+* 0.2
+    * Various bug fixes and optimizations
+    * See [commit change]() or See [release history]()
+* 0.1
+    * Initial Release
+
+## License
+
+This project is licensed under the [NAME HERE] License - see the LICENSE.md file for details
+
+## Acknowledgments
+
+* [awesome-readme](https://github.com/matiassingers/awesome-readme)
+* [pitchfork](https://api.csswg.org/bikeshed/?force=1&url=https://raw.githubusercontent.com/vector-of-bool/pitchfork/develop/data/spec.bs)
+* [project-layout](https://github.com/golang-standards/project-layout)
+EOM
+
+git init
+go mod init github.com/jdavasligil/$APPNAME
