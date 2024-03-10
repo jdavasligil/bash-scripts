@@ -112,12 +112,21 @@ EOM
 
 # Make File
 cat > Makefile << EOM
+.PHONY: build
 build:
 	@go build -o ./bin/$APPNAME ./cmd/$APPNAME
+
+.PHONY: run
 run:
 	@./bin/$APPNAME
+
+.PHONY: test
 test:
 	@go test -v ./...
+
+.PHONY: clean
+clean:
+	@go clean && rm -rf ./bin/*
 EOM
 
 # READ ME
